@@ -7,6 +7,8 @@ function Home() {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [stuClass, setStuClass] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortAsc, setSortAsc] = useState(true);
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/students')
@@ -35,48 +37,107 @@ function Home() {
     }
   };
 
-  return (
-    <div style={{ padding: "20px" }}>
-      <h1>Quản lý Học Sinh</h1>
+  const filteredStudents = students.filter(student => 
+    student.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-      <div style={{ marginBottom: "20px", border: "1px solid #ddd", padding: "10px" }}>
-        <h3>Thêm học sinh mới</h3>
-        <form onSubmit={handleAddStudent}>
-          <input type="text" placeholder="Họ tên" value={name} onChange={e => setName(e.target.value)} required style={{ marginRight: "10px" }} />
-          <input type="number" placeholder="Tuổi" value={age} onChange={e => setAge(e.target.value)} required style={{ marginRight: "10px" }} />
-          <input type="text" placeholder="Lớp" value={stuClass} onChange={e => setStuClass(e.target.value)} required style={{ marginRight: "10px" }} />
-          <button type="submit">Thêm học sinh</button>
+  const sortedStudents = [...filteredStudents].sort((a, b) => {
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
+
+      if (nameA < nameB) return sortAsc ? -1 : 1;
+      if (nameA > nameB) return sortAsc ? 1 : -1;
+      return 0;
+  });
+
+  return (
+    <div className="container">
+      <h1>Hệ Thống Quản Lý Học Sinh</h1>
+
+      <div className="form-card">
+        <h3>Thêm Học Sinh Mới</h3>
+        <form onSubmit={handleAddStudent} className="form-row">
+          <input 
+            type="text" 
+            placeholder="Họ tên" 
+            value={name} 
+            onChange={e => setName(e.target.value)} 
+            required 
+            style={{flex: 2}}
+          />
+          <input 
+            type="number" 
+            placeholder="Tuổi" 
+            value={age} 
+            onChange={e => setAge(e.target.value)} 
+            required 
+            style={{flex: 0.5}}
+          />
+          <input 
+            type="text" 
+            placeholder="Lớp" 
+            value={stuClass} 
+            onChange={e => setStuClass(e.target.value)} 
+            required 
+            style={{flex: 1}}
+          />
+          <button type="submit" className="btn btn-add">Thêm mới</button>
         </form>
       </div>
 
-      <table border="1" cellPadding="10" style={{ borderCollapse: "collapse", width: "100%" }}>
+      <div className="tools-container">
+        <input 
+            className="search-input"
+            type="text" 
+            placeholder="🔍 Nhập tên để tìm kiếm..." 
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+        />
+        
+        <button 
+            className="btn btn-sort"
+            onClick={() => setSortAsc(prev => !prev)}
+        >
+            Sắp xếp: {sortAsc ? "A ➜ Z" : "Z ➜ A"}
+        </button>
+      </div>
+
+      <table className="student-table">
         <thead>
           <tr>
             <th>Họ tên</th>
             <th>Tuổi</th>
             <th>Lớp</th>
-            <th>Hành động</th>
+            <th style={{width: '180px'}}>Hành động</th>
           </tr>
         </thead>
         <tbody>
-          {students.map((student) => (
-            <tr key={student._id}>
-              <td>{student.name}</td>
-              <td>{student.age}</td>
-              <td>{student.class}</td>
-              <td>
-                <Link to={`/edit/${student._id}`}>
-                  <button style={{ marginRight: "10px" }}>Sửa</button>
-                </Link>
-                <button 
-                    onClick={() => handleDelete(student._id)} 
-                    style={{ backgroundColor: "#ff4d4d", color: "white", border: "none", padding: "5px 10px", cursor: "pointer" }}
-                >
-                    Xóa
-                </button>
-              </td>
+          {sortedStudents.length > 0 ? (
+            sortedStudents.map((student) => (
+              <tr key={student._id}>
+                <td>{student.name}</td>
+                <td>{student.age}</td>
+                <td>{student.class}</td>
+                <td>
+                  <Link to={`/edit/${student._id}`}>
+                    <button className="btn btn-edit">Sửa</button>
+                  </Link>
+                  <button 
+                      className="btn btn-delete"
+                      onClick={() => handleDelete(student._id)} 
+                  >
+                      Xóa
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+                <td colSpan="4" className="empty-message">
+                    Không tìm thấy dữ liệu phù hợp
+                </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
