@@ -1,0 +1,70 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+
+function Home() {
+  const [students, setStudents] = useState([]);
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+  const [stuClass, setStuClass] = useState("");
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/students')
+      .then(response => setStudents(response.data))
+      .catch(error => console.error("Lỗi khi fetch danh sách:", error));
+  }, []);
+
+  const handleAddStudent = (e) => {
+    e.preventDefault();
+    const newStu = { name, age: Number(age), class: stuClass };
+    axios.post('http://localhost:5000/api/students', newStu)
+      .then(res => {
+        setStudents(prev => [...prev, res.data]);
+        setName(""); setAge(""); setStuClass("");
+      })
+      .catch(err => console.error("Lỗi khi thêm:", err));
+  };
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>Quản lý Học Sinh</h1>
+
+      <div style={{ marginBottom: "20px", border: "1px solid #ddd", padding: "10px" }}>
+        <h3>Thêm học sinh mới</h3>
+        <form onSubmit={handleAddStudent}>
+          <input type="text" placeholder="Họ tên" value={name} onChange={e => setName(e.target.value)} required style={{ marginRight: "10px" }} />
+          <input type="number" placeholder="Tuổi" value={age} onChange={e => setAge(e.target.value)} required style={{ marginRight: "10px" }} />
+          <input type="text" placeholder="Lớp" value={stuClass} onChange={e => setStuClass(e.target.value)} required style={{ marginRight: "10px" }} />
+          <button type="submit">Thêm học sinh</button>
+        </form>
+      </div>
+
+      <table border="1" cellPadding="10" style={{ borderCollapse: "collapse", width: "100%" }}>
+        <thead>
+          <tr>
+            <th>Họ tên</th>
+            <th>Tuổi</th>
+            <th>Lớp</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          {students.map((student) => (
+            <tr key={student._id}>
+              <td>{student.name}</td>
+              <td>{student.age}</td>
+              <td>{student.class}</td>
+              <td>
+                <Link to={`/edit/${student._id}`}>
+                  <button>Sửa</button>
+                </Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default Home;

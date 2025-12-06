@@ -46,6 +46,23 @@ app.put('/api/students/:id', async (req, res) => {
     }
 });
 
+app.put('/api/students/:id', async (req, res) => {
+    try {
+        const updatedStu = await Student.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+
+        if (!updatedStu) {
+            return res.status(404).json({ error: "Student not found" });
+        }
+        res.json(updatedStu);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server đang chạy tại http://localhost:${PORT}`);
 });
