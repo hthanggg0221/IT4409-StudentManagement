@@ -25,6 +25,16 @@ function Home() {
       .catch(err => console.error("Lỗi khi thêm:", err));
   };
 
+  const handleDelete = (id) => {
+    if (window.confirm("Bạn có chắc muốn xóa học sinh này?")) {axios.delete(`http://localhost:5000/api/students/${id}`)
+            .then(res => {
+                console.log(res.data.message);
+                setStudents(prevList => prevList.filter(s => s._id !== id));
+            })
+            .catch(err => console.error("Lỗi khi xóa:", err));
+    }
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <h1>Quản lý Học Sinh</h1>
@@ -56,8 +66,14 @@ function Home() {
               <td>{student.class}</td>
               <td>
                 <Link to={`/edit/${student._id}`}>
-                  <button>Sửa</button>
+                  <button style={{ marginRight: "10px" }}>Sửa</button>
                 </Link>
+                <button 
+                    onClick={() => handleDelete(student._id)} 
+                    style={{ backgroundColor: "#ff4d4d", color: "white", border: "none", padding: "5px 10px", cursor: "pointer" }}
+                >
+                    Xóa
+                </button>
               </td>
             </tr>
           ))}

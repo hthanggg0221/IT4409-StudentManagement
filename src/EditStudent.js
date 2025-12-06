@@ -11,9 +11,7 @@ function EditStudent() {
     const [stuClass, setStuClass] = useState("");
 
     useEffect(() => {
-        axios.get(`http://localhost:5000/api/students`)
-        
-        axios.get(`http://localhost:5000/api/students`)
+        axios.get(`http://localhost:5000/api/students/${id}`)
             .then(res => {
                 const student = res.data.find(s => s._id === id);
                 if (student) {
